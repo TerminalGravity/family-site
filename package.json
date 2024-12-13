@@ -1,0 +1,37 @@
+{
+  "name": "family-dinner-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare && prisma generate",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@heroicons/vue": "^2.0.18",
+    "@nuxt/image": "^1.0.0",
+    "@pinia/nuxt": "^0.5.1",
+    "@prisma/client": "^5.10.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@vueuse/core": "^10.7.0",
+    "nuxt": "^3.14.1592",
+    "pinia": "^2.1.7",
+    "vue": "latest",
+    "vue-router": "latest",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.10.1",
+    "@types/node": "^20.10.4",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "prisma": "^5.10.2",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3"
+  }
+}

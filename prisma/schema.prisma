@@ -1,0 +1,65 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  rules       String    @db.Text
+  minPlayers  Int
+  maxPlayers  Int
+  duration    String    // e.g., "30-45 minutes"
+  complexity  String    // "Easy", "Medium", "Hard"
+  tags        String[]
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String    // User ID or name
+  lastPlayed  DateTime?
+  ratings     Rating[]
+  comments    Comment[]
+}
+
+model Photo {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  dinnerDate  DateTime
+  tags        String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String    // User ID or name
+  comments    Comment[]
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  value     Int      // 1-5 stars
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdBy String   // User ID or name
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([gameId, createdBy])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  gameId    String?
+  game      Game?    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  photoId   String?
+  photo     Photo?   @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  createdBy String   // User ID or name
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+} 
