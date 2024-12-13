@@ -13,11 +13,12 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.0.18",
     "@nuxt/image": "^1.0.0",
     "@pinia/nuxt": "^0.5.1",
     "@prisma/client": "^5.10.2",
-    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/forms": "^0.5.9",
     "@vueuse/core": "^10.7.0",
     "nuxt": "^3.14.1592",
     "pinia": "^2.1.7",
@@ -27,6 +28,8 @@
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.10.1",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^20.10.4",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",

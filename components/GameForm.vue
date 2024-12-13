@@ -1,233 +1,340 @@
 <template>
-  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-      <form @submit.prevent="handleSubmit">
-        <!-- Header -->
-        <div class="px-6 py-4 border-b border-gray-200">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-gray-900">
-              {{ game ? 'Edit Game' : 'Add New Game' }}
-            </h2>
-            <button @click="$emit('close')" type="button" class="text-gray-400 hover:text-gray-500">
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+  <div>
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="true" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-40"></div>
+      </Transition>
+
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div v-if="true" class="fixed inset-0 z-50 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <div class="w-full max-w-2xl transform overflow-hidden rounded-xl bg-white dark:bg-slate-800 p-6 text-left align-middle shadow-xl transition-all">
+              <h3 class="text-lg font-medium leading-6 text-slate-900 dark:text-white mb-4">
+                {{ game ? 'Edit Game' : 'Add New Game' }}
+              </h3>
+
+              <form @submit.prevent="handleSubmit" class="space-y-6">
+                <!-- Loading Overlay -->
+                <div v-if="isLoading" class="absolute inset-0 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+                </div>
+
+                <!-- Title -->
+                <div>
+                  <label for="title" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    v-model="form.title"
+                    :class="[
+                      'input w-full',
+                      errors.title ? 'border-red-500 dark:border-red-500' : ''
+                    ]"
+                    required
+                  />
+                  <p v-if="errors.title" class="mt-1 text-sm text-red-500">{{ errors.title }}</p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    v-model="form.description"
+                    rows="3"
+                    :class="[
+                      'input w-full',
+                      errors.description ? 'border-red-500 dark:border-red-500' : ''
+                    ]"
+                    required
+                  ></textarea>
+                  <p v-if="errors.description" class="mt-1 text-sm text-red-500">{{ errors.description }}</p>
+                </div>
+
+                <!-- Rules -->
+                <div>
+                  <label for="rules" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Rules
+                  </label>
+                  <textarea
+                    id="rules"
+                    v-model="form.rules"
+                    rows="4"
+                    :class="[
+                      'input w-full',
+                      errors.rules ? 'border-red-500 dark:border-red-500' : ''
+                    ]"
+                    required
+                  ></textarea>
+                  <p v-if="errors.rules" class="mt-1 text-sm text-red-500">{{ errors.rules }}</p>
+                </div>
+
+                <!-- Player Count -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="minPlayers" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Minimum Players
+                    </label>
+                    <input
+                      type="number"
+                      id="minPlayers"
+                      v-model="form.minPlayers"
+                      min="1"
+                      :class="[
+                        'input w-full',
+                        errors.minPlayers ? 'border-red-500 dark:border-red-500' : ''
+                      ]"
+                      required
+                    />
+                    <p v-if="errors.minPlayers" class="mt-1 text-sm text-red-500">{{ errors.minPlayers }}</p>
+                  </div>
+
+                  <div>
+                    <label for="maxPlayers" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Maximum Players
+                    </label>
+                    <input
+                      type="number"
+                      id="maxPlayers"
+                      v-model="form.maxPlayers"
+                      min="1"
+                      :class="[
+                        'input w-full',
+                        errors.maxPlayers ? 'border-red-500 dark:border-red-500' : ''
+                      ]"
+                      required
+                    />
+                    <p v-if="errors.maxPlayers" class="mt-1 text-sm text-red-500">{{ errors.maxPlayers }}</p>
+                  </div>
+                </div>
+
+                <!-- Duration -->
+                <div>
+                  <label for="duration" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Duration (e.g., "30 minutes", "1-2 hours")
+                  </label>
+                  <input
+                    type="text"
+                    id="duration"
+                    v-model="form.duration"
+                    :class="[
+                      'input w-full',
+                      errors.duration ? 'border-red-500 dark:border-red-500' : ''
+                    ]"
+                    required
+                  />
+                  <p v-if="errors.duration" class="mt-1 text-sm text-red-500">{{ errors.duration }}</p>
+                </div>
+
+                <!-- Complexity -->
+                <div>
+                  <label for="complexity" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Complexity
+                  </label>
+                  <select
+                    id="complexity"
+                    v-model="form.complexity"
+                    :class="[
+                      'input w-full',
+                      errors.complexity ? 'border-red-500 dark:border-red-500' : ''
+                    ]"
+                    required
+                  >
+                    <option value="">Select Complexity</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                  <p v-if="errors.complexity" class="mt-1 text-sm text-red-500">{{ errors.complexity }}</p>
+                </div>
+
+                <!-- Tags -->
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Tags
+                  </label>
+                  <div class="flex flex-wrap gap-2 mb-2">
+                    <span
+                      v-for="tag in form.tags"
+                      :key="tag"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200"
+                    >
+                      {{ tag }}
+                      <button
+                        type="button"
+                        @click="removeTag(tag)"
+                        class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none"
+                      >
+                        <span class="sr-only">Remove tag</span>
+                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M6.707 6.293a1 1 0 011.414 0L10 8.586l1.879-1.88a1 1 0 111.414 1.415L11.414 10l1.879 1.879a1 1 0 01-1.414 1.414L10 11.414l-1.879 1.879a1 1 0 01-1.414-1.414L8.586 10 6.707 8.121a1 1 0 010-1.414z" />
+                        </svg>
+                      </button>
+                    </span>
+                  </div>
+                  <div class="flex gap-2">
+                    <input
+                      type="text"
+                      v-model="newTag"
+                      @keyup.enter="addTag"
+                      placeholder="Add a tag"
+                      class="input flex-1"
+                    />
+                    <button
+                      type="button"
+                      @click="addTag"
+                      class="btn-secondary"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="btn-secondary"
+                    :disabled="isLoading"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn-primary"
+                    :disabled="isLoading"
+                  >
+                    {{ game ? 'Save Changes' : 'Add Game' }}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-
-        <!-- Form Fields -->
-        <div class="px-6 py-4 space-y-6">
-          <!-- Basic Info -->
-          <div class="grid grid-cols-1 gap-6">
-            <div>
-              <label for="title" class="block text-sm font-medium text-gray-700">Game Title</label>
-              <input
-                type="text"
-                id="title"
-                v-model="form.title"
-                required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                id="description"
-                v-model="form.description"
-                rows="3"
-                required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              ></textarea>
-            </div>
-
-            <div>
-              <label for="rules" class="block text-sm font-medium text-gray-700">Rules</label>
-              <textarea
-                id="rules"
-                v-model="form.rules"
-                rows="5"
-                required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              ></textarea>
-            </div>
-          </div>
-
-          <!-- Game Details -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label for="minPlayers" class="block text-sm font-medium text-gray-700">Minimum Players</label>
-              <input
-                type="number"
-                id="minPlayers"
-                v-model="form.minPlayers"
-                min="1"
-                required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label for="maxPlayers" class="block text-sm font-medium text-gray-700">Maximum Players</label>
-              <input
-                type="number"
-                id="maxPlayers"
-                v-model="form.maxPlayers"
-                min="1"
-                required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label for="duration" class="block text-sm font-medium text-gray-700">Duration</label>
-              <input
-                type="text"
-                id="duration"
-                v-model="form.duration"
-                placeholder="e.g., 30-45 minutes"
-                required
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label for="complexity" class="block text-sm font-medium text-gray-700">Complexity</label>
-              <select
-                id="complexity"
-                v-model="form.complexity"
-                required
-                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-              >
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Image URL -->
-          <div>
-            <label for="imageUrl" class="block text-sm font-medium text-gray-700">Image URL</label>
-            <input
-              type="url"
-              id="imageUrl"
-              v-model="form.imageUrl"
-              placeholder="https://example.com/image.jpg"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-
-          <!-- Tags -->
-          <div>
-            <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
-            <div class="mt-1">
-              <input
-                type="text"
-                id="tags"
-                v-model="tagInput"
-                @keydown.enter.prevent="addTag"
-                placeholder="Add tags (press Enter)"
-                class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <span
-                v-for="tag in form.tags"
-                :key="tag"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-              >
-                {{ tag }}
-                <button
-                  type="button"
-                  @click="removeTag(tag)"
-                  class="ml-1 text-indigo-600 hover:text-indigo-500"
-                >
-                  <span class="sr-only">Remove tag</span>
-                  ×
-                </button>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-          <button
-            type="button"
-            @click="$emit('close')"
-            class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            {{ game ? 'Save Changes' : 'Add Game' }}
-          </button>
-        </div>
-      </form>
-    </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Game } from '@prisma/client'
+import { ref, onMounted } from 'vue'
 
 const props = defineProps<{
-  game?: Game
+  game?: any
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'save', game: Omit<Game, 'id' | 'createdAt' | 'updatedAt' | 'lastPlayed'>): void
+  (e: 'save', game: any): void
 }>()
 
-const tagInput = ref('')
+const isLoading = ref(false)
+const errors = ref<Record<string, string>>({})
+const newTag = ref('')
 
-// Initialize form with game data or defaults
 const form = ref({
   title: '',
   description: '',
   rules: '',
-  minPlayers: 2,
-  maxPlayers: 4,
+  minPlayers: 1,
+  maxPlayers: 1,
   duration: '',
-  complexity: 'Medium',
+  complexity: '',
   tags: [] as string[],
-  imageUrl: '',
-  createdBy: 'current-user' // TODO: Get from auth
 })
 
-// If editing, populate form with game data
-if (props.game) {
-  form.value = { ...props.game }
+const validateForm = () => {
+  const newErrors: Record<string, string> = {}
+
+  if (!form.value.title.trim()) {
+    newErrors.title = 'Title is required'
+  }
+
+  if (!form.value.description.trim()) {
+    newErrors.description = 'Description is required'
+  }
+
+  if (!form.value.rules.trim()) {
+    newErrors.rules = 'Rules are required'
+  }
+
+  if (form.value.minPlayers < 1) {
+    newErrors.minPlayers = 'Minimum players must be at least 1'
+  }
+
+  if (form.value.maxPlayers < form.value.minPlayers) {
+    newErrors.maxPlayers = 'Maximum players must be greater than or equal to minimum players'
+  }
+
+  if (!form.value.duration.trim()) {
+    newErrors.duration = 'Duration is required'
+  }
+
+  if (!form.value.complexity) {
+    newErrors.complexity = 'Complexity is required'
+  }
+
+  errors.value = newErrors
+  return Object.keys(newErrors).length === 0
 }
 
-// Form methods
+const handleSubmit = async () => {
+  if (!validateForm()) return
+
+  try {
+    isLoading.value = true
+    await emit('save', { ...form.value })
+  } catch (error) {
+    console.error('Failed to save game:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const addTag = () => {
-  const tag = tagInput.value.trim()
+  const tag = newTag.value.trim()
   if (tag && !form.value.tags.includes(tag)) {
     form.value.tags.push(tag)
   }
-  tagInput.value = ''
+  newTag.value = ''
 }
 
 const removeTag = (tag: string) => {
-  const index = form.value.tags.indexOf(tag)
-  if (index !== -1) {
-    form.value.tags.splice(index, 1)
-  }
+  form.value.tags = form.value.tags.filter(t => t !== tag)
 }
 
-const handleSubmit = () => {
-  if (form.value.minPlayers > form.value.maxPlayers) {
-    alert('Minimum players cannot be greater than maximum players')
-    return
+// Initialize form with game data if editing
+onMounted(() => {
+  if (props.game) {
+    form.value = {
+      title: props.game.title,
+      description: props.game.description,
+      rules: props.game.rules,
+      minPlayers: props.game.minPlayers,
+      maxPlayers: props.game.maxPlayers,
+      duration: props.game.duration,
+      complexity: props.game.complexity,
+      tags: [...props.game.tags],
+    }
   }
-
-  emit('save', form.value)
-}
+})
 </script> 
